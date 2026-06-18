@@ -1,0 +1,23 @@
+{
+  "name": "@nythral/nmail",
+  "version": "0.1.0",
+  "description": "Official Nmail transactional email client for server-side JavaScript and Next.js.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "check": "node --check src/index.js",
+    "test": "node --test"
+  }
+}
