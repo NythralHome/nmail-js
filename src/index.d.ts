@@ -10,19 +10,28 @@ export type NmailSendEmailInput = {
 export type NmailSendEmailResult = {
   id?: string;
   messageId?: string;
-  status: "sent" | string;
+  status: "queued" | string;
 };
 
 export type NmailClientOptions = {
   apiKey: string;
   baseUrl?: string;
   fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+  maxRetries?: number;
+  retryDelayMs?: number;
 };
 
 export class NmailApiError extends Error {
   status: number;
   code: string;
   details?: unknown;
+  readonly retryable: boolean;
+}
+
+export class NmailValidationError extends Error {
+  code: "validation_failed";
+  field?: string;
 }
 
 export class NmailClient {

@@ -1,15 +1,24 @@
 # @nythral/nmail
 
-Server-side JavaScript client for the Nmail transactional email API.
+Server-side JavaScript and Next.js client for the Nmail transactional email API.
 
 Do not use this package in browser code. Keep `NMAIL_API_KEY` in server environment variables.
+
+## Install
+
+```bash
+npm install @nythral/nmail
+```
 
 ## Node.js
 
 ```js
 import { NmailClient } from "@nythral/nmail";
 
-const nmail = new NmailClient({ apiKey: process.env.NMAIL_API_KEY });
+const nmail = new NmailClient({
+  apiKey: process.env.NMAIL_API_KEY,
+  timeoutMs: 10000,
+});
 
 await nmail.sendEmail({
   from: "app@yourdomain.com",
@@ -38,6 +47,65 @@ export async function POST() {
 }
 ```
 
+## OTP example
+
+```js
+export async function sendLoginCode(email, code) {
+  return nmail.sendEmail({
+    from: "app@yourdomain.com",
+    to: email,
+    subject: "Your login code",
+    text: `Your login code is ${code}. It expires in 10 minutes.`,
+  });
+}
+```
+
+## Order confirmation example
+
+```js
+await nmail.sendEmail({
+  from: "orders@yourdomain.com",
+  to: customer.email,
+  subject: `Order ${order.number} confirmed`,
+  html: `<p>Your order was confirmed.</p><p>Total: ${order.total}</p>`,
+});
+```
+
 ## Errors
 
-Failed requests throw `NmailApiError` with `status`, `code`, and optional `details`.
+Validation failures throw `NmailValidationError` before any network request.
+
+Failed API requests throw `NmailApiError` with:
+
+- `status`: HTTP status code.
+- `code`: Nmail error code such as `invalid_api_key`, `ses_domain_required`, `daily_limit_exceeded`, `recipient_limit_exceeded`, or `account_suspended`.
+- `details`: optional structured metadata.
+- `retryable`: true for transient upstream errors (`502`, `503`, `504`).
+
+```js
+import { NmailApiError, NmailValidationError } from "@nythral/nmail";
+
+try {
+  await nmail.sendEmail(message);
+} catch (error) {
+  if (error instanceof NmailValidationError) {
+    console.error(error.field, error.message);
+  } else if (error instanceof NmailApiError) {
+    console.error(error.status, error.code, error.message);
+  } else {
+    throw error;
+  }
+}
+```
+
+## Retries
+
+Automatic retries are disabled by default to avoid duplicate transactional email. You can opt in for transient transport/upstream failures:
+
+```js
+const nmail = new NmailClient({
+  apiKey: process.env.NMAIL_API_KEY,
+  maxRetries: 1,
+  retryDelayMs: 250,
+});
+```
