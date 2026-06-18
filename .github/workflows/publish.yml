@@ -2,6 +2,15 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: Type publish-nmail-js to publish to npm
+        required: true
+        default: dry-run
+      version:
+        description: Expected package.json version
+        required: true
+        default: 0.1.0
 
 jobs:
   npm:
@@ -17,6 +26,14 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm install
       - run: npm test
-      - run: npm publish --access public
+      - name: Verify release version
+        run: |
+          node -e "const p=require('./package.json'); if (p.version !== process.env.EXPECTED_VERSION) { throw new Error(`Expected ${process.env.EXPECTED_VERSION}, got ${p.version}`); }"
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+      - run: npm pack --dry-run
+      - name: Publish to npm
+        if: ${{ inputs.confirm_publish == 'publish-nmail-js' }}
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

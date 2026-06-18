@@ -3,8 +3,20 @@
   "version": "0.1.0",
   "description": "Official Nmail transactional email client for server-side JavaScript and Next.js.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NythralHome/nmail-js.git"
+  },
+  "homepage": "https://nmail.nythral.com",
+  "bugs": {
+    "url": "https://github.com/NythralHome/nmail-js/issues"
+  },
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "files": [
     "src",
     "README.md"
