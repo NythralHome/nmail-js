@@ -4,6 +4,8 @@ Server-side JavaScript and Next.js client for the Nmail transactional email API.
 
 Do not use this package in browser code. Keep `NMAIL_API_KEY` in server environment variables.
 
+The `from` address must be an active mailbox created in Nmail for your account. Nmail does not allow arbitrary `anything@yourdomain.com` sender addresses, even when the domain is verified in SES.
+
 ## Install
 
 ```bash
@@ -78,7 +80,7 @@ Validation failures throw `NmailValidationError` before any network request.
 Failed API requests throw `NmailApiError` with:
 
 - `status`: HTTP status code.
-- `code`: Nmail error code such as `invalid_api_key`, `ses_domain_required`, `daily_limit_exceeded`, `recipient_limit_exceeded`, or `account_suspended`.
+- `code`: Nmail error code such as `invalid_api_key`, `sender_mailbox_required`, `ses_domain_required`, `daily_limit_exceeded`, `recipient_limit_exceeded`, or `account_suspended`.
 - `details`: optional structured metadata.
 - `retryable`: true for transient upstream errors (`502`, `503`, `504`).
 
