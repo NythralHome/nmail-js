@@ -18,6 +18,14 @@ Use this checklist before running the `Publish` workflow.
 - Publish workflow input `confirm_publish` must be exactly `publish-nmail-js`.
 - Publish workflow input `version` must match `package.json`.
 
+## Creating npm credentials
+
+1. Sign in to `https://www.npmjs.com`.
+2. Enable 2FA on the publishing account.
+3. Create an automation access token for publishing.
+4. Add it as the `NPM_TOKEN` GitHub repository secret for `NythralHome/nmail-js`.
+5. Do not paste the token into chat, commits, issue comments, or workflow logs.
+
 ## Post-Release
 
 - Verify package page is public.
