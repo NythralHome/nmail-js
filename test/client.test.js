@@ -30,6 +30,51 @@ test("sendEmail posts normalized payload", async () => {
   });
 });
 
+test("sendEmail supports cc, bcc, stream, idempotency, and attachments", async () => {
+  const requests = [];
+  const client = new NmailClient({
+    apiKey: "nmail_live_test",
+    fetchImpl: async (url, init) => {
+      requests.push({ url, init });
+      return Response.json({ id: "msg_invoice", status: "queued" });
+    },
+  });
+
+  await client.sendEmail({
+    from: "invoices@example.com",
+    to: ["billing@example.com"],
+    cc: "owner@example.com",
+    bcc: ["audit@example.com"],
+    subject: "Invoice INV-001",
+    text: "Invoice attached.",
+    html: "<p>Invoice attached.</p>",
+    stream: "billing",
+    idempotencyKey: "invoice:INV-001",
+    attachments: [{
+      filename: "INV-001.pdf",
+      contentType: "application/pdf",
+      contentBase64: "JVBERi0xLjQK",
+    }],
+  });
+
+  assert.deepEqual(JSON.parse(requests[0].init.body), {
+    from: "invoices@example.com",
+    to: ["billing@example.com"],
+    cc: ["owner@example.com"],
+    bcc: ["audit@example.com"],
+    subject: "Invoice INV-001",
+    text: "Invoice attached.",
+    html: "<p>Invoice attached.</p>",
+    stream: "billing",
+    idempotencyKey: "invoice:INV-001",
+    attachments: [{
+      filename: "INV-001.pdf",
+      contentType: "application/pdf",
+      contentBase64: "JVBERi0xLjQK",
+    }],
+  });
+});
+
 test("sendEmail throws structured API errors", async () => {
   const client = new NmailClient({
     apiKey: "nmail_live_test",

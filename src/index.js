@@ -108,8 +108,11 @@ export async function sendEmail(input, options) {
 
 function normalizeEmailInput(input = {}) {
   assertEmail(input.from, "from");
-  const recipients = Array.isArray(input.to) ? input.to : [input.to];
-  if (!recipients.length || recipients.some((recipient) => !validEmail(recipient))) {
+  const to = normalizeEmailList(input.to);
+  const cc = normalizeEmailList(input.cc);
+  const bcc = normalizeEmailList(input.bcc);
+  const attachments = normalizeAttachments(input.attachments);
+  if (!to.length || [...to, ...cc, ...bcc].some((recipient) => !validEmail(recipient))) {
     throw new NmailValidationError("Use one or more valid recipient email addresses", "to");
   }
   if (!input.subject || typeof input.subject !== "string") {
@@ -122,13 +125,47 @@ function normalizeEmailInput(input = {}) {
 
   const payload = {
     from: input.from,
-    to: input.to,
+    to: Array.isArray(input.to) ? to : to[0],
     subject: input.subject,
   };
+  if (cc.length) payload.cc = cc;
+  if (bcc.length) payload.bcc = bcc;
   if (input.text) payload.text = input.text;
   if (input.html) payload.html = input.html;
   if (input.replyTo) payload.replyTo = input.replyTo;
+  if (input.stream) payload.stream = input.stream;
+  if (input.idempotencyKey) payload.idempotencyKey = input.idempotencyKey;
+  if (attachments.length) payload.attachments = attachments;
   return payload;
+}
+
+function normalizeEmailList(value) {
+  if (value === undefined || value === null || value === "") return [];
+  const list = Array.isArray(value) ? value : [value];
+  return [...new Set(list.map((item) => String(item || "").trim()).filter(Boolean))];
+}
+
+function normalizeAttachments(value) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) {
+    throw new NmailValidationError("Attachments must be an array", "attachments");
+  }
+  return value.map((attachment, index) => {
+    if (!attachment || typeof attachment !== "object") {
+      throw new NmailValidationError(`Attachment ${index + 1} must be an object`, "attachments");
+    }
+    const filename = String(attachment.filename || attachment.name || "").trim();
+    const contentType = String(attachment.contentType || attachment.content_type || "application/octet-stream").trim();
+    const contentBase64 = String(attachment.contentBase64 || attachment.content || "").trim();
+    if (!filename) throw new NmailValidationError(`Attachment ${index + 1} requires a filename`, "attachments");
+    if (!contentBase64) throw new NmailValidationError(`Attachment ${filename} requires contentBase64`, "attachments");
+    return {
+      filename,
+      contentType,
+      contentBase64,
+      ...(attachment.disposition ? { disposition: attachment.disposition } : {}),
+    };
+  });
 }
 
 function assertEmail(value, field) {

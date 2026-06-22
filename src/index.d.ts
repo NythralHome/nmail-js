@@ -1,10 +1,22 @@
 export type NmailSendEmailInput = {
   from: string;
   to: string | string[];
+  cc?: string | string[];
+  bcc?: string | string[];
   subject: string;
   text?: string;
   html?: string;
   replyTo?: string;
+  stream?: "auth" | "billing" | "notifications" | "marketing" | string;
+  idempotencyKey?: string;
+  attachments?: NmailAttachment[];
+};
+
+export type NmailAttachment = {
+  filename: string;
+  contentType?: string;
+  contentBase64: string;
+  disposition?: "ATTACHMENT" | "INLINE" | string;
 };
 
 export type NmailSendEmailResult = {

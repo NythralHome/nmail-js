@@ -1,6 +1,6 @@
 {
   "name": "@nythral/nmail",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Official Nmail transactional email client for server-side JavaScript and Next.js.",
   "type": "module",
   "repository": {

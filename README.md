@@ -83,6 +83,26 @@ await nmail.sendEmail({
 });
 ```
 
+## Invoice with PDF attachment
+
+```js
+await nmail.sendEmail({
+  from: "invoices@yourdomain.com",
+  to: ["billing@example.com"],
+  cc: ["owner@example.com"],
+  subject: `Invoice ${invoice.number}`,
+  text: "Please find your invoice attached.",
+  html: "<p>Please find your invoice attached.</p>",
+  stream: "billing",
+  idempotencyKey: `invoice:${invoice.id}`,
+  attachments: [{
+    filename: `${invoice.number}.pdf`,
+    contentType: "application/pdf",
+    contentBase64: invoicePdfBuffer.toString("base64"),
+  }],
+});
+```
+
 ## Errors
 
 Validation failures throw `NmailValidationError` before any network request.
