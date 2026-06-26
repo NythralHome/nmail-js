@@ -18,8 +18,16 @@ API keys are server-side secrets. Do not expose them through browser bundles, `N
 
 ## Install
 
+Install directly from the GitHub source repository:
+
 ```bash
-npm install @nythral/nmail
+npm install github:NythralHome/nmail-js
+```
+
+For a pinned production install, use a commit SHA or release tag:
+
+```bash
+npm install github:NythralHome/nmail-js#v0.2.0
 ```
 
 ## Node.js
